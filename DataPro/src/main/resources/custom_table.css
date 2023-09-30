@@ -1,0 +1,152 @@
+:root {
+    --background: #f0f4ff;
+    --background-odd: #e4e9ff;
+    --background-hover: #ccd9ff;
+    --header-text-color: #000066;
+    --text-color: #333366;
+    --text-color-dark: #000066;
+    --text-color-medium: #666699;
+    --text-color-pale: #9999cc;
+    --inner-border-color: #666699;
+    --bold-border-color: #000066;
+    --link-color: #0000cc;
+    --link-color-pale: #3333ff;
+    --link-hover: #000099;
+}
+
+:root[theme="dark"], :root [data-jp-theme-light="false"], .dataframe_dark {
+    --background: #1a1a33;
+    --background-odd: #202040;
+    --background-hover: #2a2a55;
+    --header-text-color: #ffffff;
+    --text-color: #d1d1e0;
+    --text-color-dark: #b0b0cc;
+    --text-color-medium: #9393aa;
+    --text-color-pale: #787899;
+    --inner-border-color: #606080;
+    --bold-border-color: #0000cc;
+    --link-color: #4a4aff;
+    --link-color-pale: #8080ff;
+    --link-hover: #000066;
+
+
+}
+
+p.dataframe_description {
+    color: var(--text-color-dark);
+}
+
+table.dataframe {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 12pt;
+    background-color: var(--background);
+    color: var(--text-color-dark);
+    border: none;
+    border-collapse: collapse;
+}
+
+table.dataframe th, td {
+    padding: 6px;
+    border: 1px solid transparent;
+    text-align: left;
+}
+
+table.dataframe th {
+    background-color: var(--background);
+    color: var(--header-text-color);
+}
+
+table.dataframe td {
+    vertical-align: top;
+}
+
+table.dataframe th.bottomBorder {
+    border-bottom-color: var(--bold-border-color);
+}
+
+table.dataframe tbody > tr:nth-child(odd) {
+    background: var(--background-odd);
+}
+
+table.dataframe tbody > tr:nth-child(even) {
+    background: var(--background);
+}
+
+table.dataframe tbody > tr:hover {
+    background: var(--background-hover);
+}
+
+table.dataframe a {
+    cursor: pointer;
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+table.dataframe tr:hover > td a {
+    color: var(--link-color-pale);
+}
+
+table.dataframe a:hover {
+    color: var(--link-hover);
+    text-decoration: underline;
+}
+
+table.dataframe img {
+    max-width: fit-content;
+}
+
+table.dataframe th.complex {
+    background-color: var(--background);
+    border: 1px solid var(--background);
+}
+
+table.dataframe .leftBorder {
+    border-left-color: var(--inner-border-color);
+}
+
+table.dataframe .rightBorder {
+    border-right-color: var(--inner-border-color);
+}
+
+table.dataframe .rightAlign {
+    text-align: right;
+}
+
+table.dataframe .expanderSvg {
+    width: 8px;
+    height: 8px;
+    margin-right: 3px;
+}
+
+table.dataframe .expander {
+    display: flex;
+    align-items: center;
+}
+
+/* formatting */
+
+table.dataframe .null {
+    color: var(--text-color-pale);
+}
+
+table.dataframe .structural {
+    color: var(--text-color-medium);
+    font-weight: bold;
+}
+
+table.dataframe .dataFrameCaption {
+    font-weight: bold;
+}
+
+table.dataframe .numbers {
+    color: var(--text-color-dark);
+}
+
+table.dataframe td:hover .formatted .structural, .null {
+    color: var(--text-color-dark);
+}
+
+table.dataframe tr:hover .formatted .structural, .null {
+    color: var(--text-color-dark);
+}
+

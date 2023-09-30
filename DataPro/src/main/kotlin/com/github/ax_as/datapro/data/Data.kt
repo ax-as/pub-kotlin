@@ -111,10 +111,10 @@ class Data(name: String, frame: DataFrame<*>) {
 
         val ndf = this.frame.groupBy { column }.aggregate {
             count() into "total"
+
         }
 
         return Data(this.name, ndf)
-
     }
 
     fun groupBy(col: String, into: String): Data {

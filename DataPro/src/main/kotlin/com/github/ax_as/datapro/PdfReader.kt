@@ -1,58 +1,30 @@
 package com.github.ax_as.datapro
 
-import com.github.ax_as.datapro.cmd.CustomPdfStripper
 import mu.KotlinLogging
+import org.apache.pdfbox.Loader
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
-import org.fit.pdfdom.PDFDomTree
 import technology.tabula.ObjectExtractor
 import technology.tabula.extractors.SpreadsheetExtractionAlgorithm
 import java.io.File
-import java.io.StringWriter
 import kotlin.math.min
 
 class PdfReader {
     private val logger = KotlinLogging.logger {}
 
-    fun extractToHtml(
-        filepath: String,
-        pageRange: Pair<Int, Int>? = null,
-        clear: Boolean = true
-    ): String {
-
-        val pdfFile = File(filepath)
-        var html: String = ""
-        PDDocument.load(pdfFile).use {
-            val output = StringWriter()
-            val parser = PDFDomTree()
-            parser.writeText(it, output)
-            output.close()
-            html = output.toString()
-        }
-        return html
-
-    }
-
     fun extractToText(
         filepath: String,
         pageRange: Pair<Int, Int>? = null,
-        htmlTags: Boolean = true,
+        htmlTags: Boolean = false,
         clear: Boolean = true
     ): String {
         val pdfFile = File(filepath)
         val text: String
-        PDDocument.load(pdfFile).use {
-            val stripper =
-                if (htmlTags) CustomPdfStripper() else PDFTextStripper()
-
-            val (start, end) = getRange(pageRange, it)
+        Loader.loadPDF(pdfFile).use { doc ->
+            val stripper = PDFTextStripper()
 
             text = buildString {
-                for (i in start..end) {
-                    stripper.startPage = i
-                    stripper.endPage = i
-                    append(stripper.getText(it))
-                }
+                append(stripper.getText(doc))
             }
         }
 
@@ -70,15 +42,11 @@ class PdfReader {
             setOf(RegexOption.MULTILINE)
         )
 
-        var t = rawText.replace(lineWithOnlyNumber, "").lines()
-            .filter {
-                it.isNotBlank()
-            }.joinToString("\n").replace(lineWithOnlyNumber, "")
-
-//        return joinBrokenWords(t)
-
+        var t = rawText.replace(lineWithOnlyNumber, " ")
+        t = t.replace("""(\n+)""".toRegex(RegexOption.DOT_MATCHES_ALL), " ")
+        t = t.replace("""(\n)""".toRegex(RegexOption.DOT_MATCHES_ALL), " ")
+        t = t.replace("""(\s+)""".toRegex(RegexOption.DOT_MATCHES_ALL), " ")
         return t
-
     }
 
     private fun getRange(
@@ -93,12 +61,16 @@ class PdfReader {
         )
     }
 
-    fun tabulate(filepath: String): String {
+    fun tabulate(filepath: String, sep: String = ","): String {
         val pdfFile = File(filepath)
         val sb = StringBuilder()
-        PDDocument.load(pdfFile).use {
+        val stripper = PDFTextStripper()
+
+
+        Loader.loadPDF(pdfFile).use { doc ->
+
             val sea = SpreadsheetExtractionAlgorithm()
-            val pi = ObjectExtractor(it).extract()
+            val pi = ObjectExtractor(doc).extract()
 
             while (pi.hasNext()) {
                 val page = pi.next()
@@ -107,20 +79,14 @@ class PdfReader {
 
                     val rows = table.rows
                     for (cell in rows) {
+                        sb.append(cell.joinToString(sep) { it.getText() })
 
-                        for (content in cell) {
-                            val text: String =
-                                content.getText().replace("\n", " ")
-                                    .replace("\r", " ")
-                            sb.append("$text,")
-                            logger.debug { text }
-                        }
                         sb.appendLine()
-                        logger.debug { "" }
                     }
                 }
             }
         }
+
 
 
         return sb.toString()
@@ -144,7 +110,7 @@ class PdfReader {
                 }
             }
 
-            sb.append(line).append("\n")
+            sb.append(line).append(" ")
         }
 
         return sb.toString()

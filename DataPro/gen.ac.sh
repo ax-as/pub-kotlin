@@ -1,0 +1,1 @@
+./run.sh pdf --replace " / " "\n" -s "APLICADOS 1.1 Resultado final na prova de conhecimentos aplicados, na seguinte ordem: número de inscrição, nome do candidato em ordem alfabética e nota final na prova de conhecimentos aplicados. " -e ". 1.1.1 Resultado final dos candidatos que solicitaram concorrer às vagas reservadas às pessoas com deficiência" $@

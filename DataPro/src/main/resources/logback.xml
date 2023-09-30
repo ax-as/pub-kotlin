@@ -1,0 +1,8 @@
+<configuration>
+    <logger name="org.apache.pdfbox" level="OFF"/>
+    <logger name="org.apache.pdfbox" level="OFF"/>
+    <logger name="org.apache.fontbox" level="OFF"/>
+    <logger name="Exposed" level="OFF" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+</configuration>

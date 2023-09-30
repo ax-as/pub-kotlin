@@ -11,38 +11,34 @@ class TextFilter {
         text: String,
         start: String = "",
         end: String = "",
-        includeStart: Boolean = true,
-    ): List<String> {
+        excludeStart: Boolean = true,
+        includeEnd: Boolean = false,
+    ): String {
         if (start == "" && end == "") {
-            return arrayListOf(text)
+            return text
         }
 
-        val rx: Regex = buildRegex(start, end)
-        return rx.findAll(text).map {
-            var modValue = it.value.trim()
+        var firstStart = text.indexOf(start)
+        if (firstStart < 0) {
+            throw Error("[$start] não encontrado")
+        }
+        if (!excludeStart) {
+            firstStart += start.length
+        }
 
-            if (!includeStart) {
-                modValue = modValue.replaceFirst(
-                    Regex.escape(start)
-                        .toRegex(setOf(RegexOption.DOT_MATCHES_ALL)), ""
-                )
-            }
+        var lastEnd = text.lastIndexOf(end)
+        if (lastEnd < 0) {
+            throw Error("[$end] não encontrado")
+        }
+        if (includeEnd) {
+            lastEnd += end.length
+        }
 
-            val fbt = firstBoldTag.find(modValue)
-            fbt?.let { mr ->
-                if (mr.value == "</b>") {
-                    modValue = "<b>$modValue"
-                }
-            }
-            modValue = modValue.reversed()
-            val lbt = lastBoldTag.find(modValue)
-            lbt?.let { mr ->
-                if (mr.value == "<b>".reversed()) {
-                    modValue = "</b>".reversed()+modValue
-                }
-            }
-            modValue.reversed().trim()
-        }.toList()
+        if (lastEnd < firstStart) {
+            throw Error("end [$lastEnd] aparece antes de start [$firstStart] ")
+        }
+
+        return text.substring(maxOf(0, firstStart), minOf(text.length, lastEnd))
     }
 
     private fun buildRegex(start: String, end: String): Regex {

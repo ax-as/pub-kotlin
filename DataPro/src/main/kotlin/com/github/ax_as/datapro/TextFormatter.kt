@@ -5,7 +5,7 @@ class TextFormatter {
     fun format(text: String) : String{
         val bolds = regexBold.findAll(text)
         for (bold in bolds) {
-            println(bold.value)
+//            println(bold.value)
         }
 
         return text

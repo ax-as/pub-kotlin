@@ -27,6 +27,7 @@ var kandy_version = "0.4.4"
 
 dependencies {
     testImplementation(kotlin("test"))
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
 
     dependencies {
         implementation("org.jetbrains.kotlinx:dataframe:0.11.0")
@@ -34,50 +35,22 @@ dependencies {
         implementation("com.github.ajalt.clikt:clikt:4.2.0")
         implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:4.4.2")
         implementation("org.jetbrains.lets-plot:lets-plot-image-export:4.0.0")
-        implementation("io.github.microutils:kotlin-logging:2.0.11")
-        implementation("ch.qos.logback:logback-classic:1.2.3")
+//        implementation("io.github.microutils:kotlin-logging:2.0.11")
+//        implementation("ch.qos.logback:logback-classic:1.2.3"){
+//
+//
+//        }
 
-        val luceneV = "8.11.2"
-        implementation("org.apache.lucene:lucene-core:$luceneV")  // Verifique a versão mais recente
-        implementation("org.apache.lucene:lucene-analyzers-common:8.11.2")
-        implementation("org.apache.lucene:lucene-queryparser:$luceneV")
-        implementation("org.apache.lucene:lucene-queries:$luceneV")
-        implementation("org.apache.lucene:lucene-misc:$luceneV")
-        implementation("org.apache.lucene:lucene-memory:$luceneV")
-//// https://mvnrepository.com/artifact/net.sf.cssbox/pdf2dom
-//        implementation("net.sf.cssbox:pdf2dom:2.0.3")
+        // https://mvnrepository.com/artifact/org.slf4j/slf4j-nop
+        testImplementation("org.slf4j:slf4j-nop:2.0.9")
 
 
-
-        // https://mvnrepository.com/artifact/net.sf.cssbox/pdf2dom-lite
-        implementation("net.sf.cssbox:pdf2dom-lite:2.0.3")
-
-// https://mvnrepository.com/artifact/com.github.holgerbrandl/krangl
-        runtimeOnly("com.github.holgerbrandl:krangl:0.18.4")
-
-
-//        implementation("org.apache.pdfbox:pdfbox:2.0.29")
-//        // https://mvnrepository.com/artifact/org.jetbrains.lets-plot/lets-plot-common
-//        implementation("org.jetbrains.lets-plot:lets-plot-common:4.0.0")
-
-
-//        // https://mvnrepository.com/artifact/org.jetbrains.lets-plot/lets-plot-kotlin-api
-//    implementation("org.apache.commons:commons-text:1.11.1")
-//        implementation("org.jetbrains.lets-plot:lets-plot-kotlin-api:2.0.1")
-
-//        implementation("org.jetbrains.kotlinx:kandy-lets-plot:$kandy_version")
-//        implementation("org.jetbrains.kotlinx:kandy-api:$kandy_version")
-
-// https://mvnrepository.com/artifact/jetbrains.datalore.notebook/datalore-model
-//        implementation("jetbrains.datalore.notebook:datalore-model:326038")
-
-//        implementation("org.jetbrains.lets-plot:lets-plot-jfx:4.0.0")
-//        implementation ("org.jetbrains.lets-plot:lets-plot-batik:4.0.0")
-
-//        implementation("space.kscience:plotlykt-server:0.5.3")
-//        implementation("no.tornado:tornadofx:1.7.20")
-
-
+        // This dependency is used by the application.
+        implementation("com.google.guava:guava:32.1.1-jre")
+        // https://mvnrepository.com/artifact/org.apache.pdfbox/pdfbox
+        implementation("org.apache.pdfbox:pdfbox:3.0.0"){
+            exclude(group = "ch.qos.logback", module = "logback-classic")
+        }
     }
 }
 
@@ -85,6 +58,9 @@ tasks.test {
     useJUnitPlatform()
 }
 
+tasks.withType<Test>().configureEach {
+    forkEvery = 100
+}
 
 kotlin {
     kotlinDaemonJvmArgs = listOf("-Xmx486m", "-Xms256m", "-XX:+UseParallelGC")
@@ -120,6 +96,7 @@ tasks.jar {
     from(configurations.runtimeClasspath.get().map {
         if (it.isDirectory) it else zipTree(it)
     })
+
 
     exclude("META-INF/*.SF")
     exclude("META-INF/*.DSA")

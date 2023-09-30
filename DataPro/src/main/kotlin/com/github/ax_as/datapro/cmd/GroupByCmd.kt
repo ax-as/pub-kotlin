@@ -4,9 +4,8 @@ import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.pair
 import mu.KotlinLogging
 
-class GroupByCmd : BaseCmd(name = "gb", invokeWithoutSubcommand = true) {
+class GroupByCmd : BaseCmd(name = "--groupBy", invokeWithoutSubcommand = true) {
     val logger = KotlinLogging.logger {}
-
 
     val groupBy by argument().pair()
 
@@ -16,7 +15,7 @@ class GroupByCmd : BaseCmd(name = "gb", invokeWithoutSubcommand = true) {
 
         forEach { _, d ->
 //            d.groupBy(group, into)
-            d.gb(group, into)
+            d.groupBy(group, into)
         }
     }
 }
