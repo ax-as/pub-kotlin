@@ -18,8 +18,6 @@ interface CsvFilesHolder {
     }
 
 
-
-
     fun loadAndMerge(
         name: String,
         files: List<Path>,

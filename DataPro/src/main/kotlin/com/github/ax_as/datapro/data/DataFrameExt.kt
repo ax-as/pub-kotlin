@@ -3,7 +3,26 @@ package com.github.ax_as.datapro.data
 import org.jetbrains.kotlinx.dataframe.AnyCol
 import org.jetbrains.kotlinx.dataframe.DataColumn
 import org.jetbrains.kotlinx.dataframe.DataFrame
-import org.jetbrains.kotlinx.dataframe.api.*
+import org.jetbrains.kotlinx.dataframe.api.JoinType
+import org.jetbrains.kotlinx.dataframe.api.ParserOptions
+import org.jetbrains.kotlinx.dataframe.api.add
+import org.jetbrains.kotlinx.dataframe.api.after
+import org.jetbrains.kotlinx.dataframe.api.concat
+import org.jetbrains.kotlinx.dataframe.api.distinct
+import org.jetbrains.kotlinx.dataframe.api.filter
+import org.jetbrains.kotlinx.dataframe.api.groupBy
+import org.jetbrains.kotlinx.dataframe.api.into
+import org.jetbrains.kotlinx.dataframe.api.join
+import org.jetbrains.kotlinx.dataframe.api.move
+import org.jetbrains.kotlinx.dataframe.api.moveToLeft
+import org.jetbrains.kotlinx.dataframe.api.remove
+import org.jetbrains.kotlinx.dataframe.api.rename
+import org.jetbrains.kotlinx.dataframe.api.sortBy
+import org.jetbrains.kotlinx.dataframe.api.sortByCount
+import org.jetbrains.kotlinx.dataframe.api.sortByDesc
+import org.jetbrains.kotlinx.dataframe.api.to
+import org.jetbrains.kotlinx.dataframe.api.toColumnAccessor
+import org.jetbrains.kotlinx.dataframe.api.update
 import org.jetbrains.kotlinx.dataframe.columns.ColumnReference
 import org.jetbrains.kotlinx.dataframe.io.DataFrameHtmlData
 import org.jetbrains.kotlinx.dataframe.io.DisplayConfiguration
@@ -12,7 +31,7 @@ import org.jetbrains.kotlinx.dataframe.io.toStandaloneHTML
 import org.jetbrains.kotlinx.dataframe.name
 import java.nio.file.Path
 import java.text.Normalizer
-import java.util.*
+import java.util.Locale
 import kotlin.io.path.absolutePathString
 
 private val REGEX_UNACCENT = "\\p{InCombiningDiacriticalMarks}+".toRegex()
@@ -35,6 +54,7 @@ fun DataFrame.Companion.concursoBB(localFile: String): DataFrame<*> {
         .normalizeData("nome".toColumnAccessor()).remove("inscricao").distinct()
 }
 
+
 fun DataFrame.Companion.concursoSerpro(localFile: String): DataFrame<*> {
     return DataFrame.fromLocal(localFile, ',')
         .normalizeData("nome".toColumnAccessor())
@@ -44,6 +64,12 @@ fun DataFrame.Companion.concursoSerpro(localFile: String): DataFrame<*> {
         .add("NFC") {
             "N1"<Int>() + "N2x2"<Float>() + "N3"<Float>()
         }.remove("notafinalal")
+}
+fun DataFrame.Companion.concursoSerproFinal(localFile: String): DataFrame<*> {
+    return DataFrame.fromLocal(localFile, ',')
+        .normalizeData("nome".toColumnAccessor())
+//        .distinctBy("inscricao")
+
 }
 
 fun DataFrame.Companion.concursoSerproObjetivas(localFile: String): DataFrame<*> {
@@ -73,8 +99,8 @@ fun DataFrame<*>.add_prova_pratica_prov(pratica: DataFrame<*>): DataFrame<*> {
     return join(pratica, JoinType.Inner) {
         it["inscricao"] match right["inscricao"]
     }.add("nfc_prov") {
-            "p3_prov"<Float>() + "OBJ_POND"<Float> ()
-        }.sortByDesc("nfc_prov").add("class_nfc_prov"){pos ++}
+        "p3_prov"<Float>() + "OBJ_POND"<Float>()
+    }.sortByDesc("nfc_prov").add("class_nfc_prov") { pos++ }
 }
 
 fun DataFrame<*>.add_prova_pratica_final(pratica: DataFrame<*>): DataFrame<*> {
@@ -82,8 +108,8 @@ fun DataFrame<*>.add_prova_pratica_final(pratica: DataFrame<*>): DataFrame<*> {
     return join(pratica, JoinType.Inner) {
         it["inscricao"] match right["inscricao"]
     }.add("NFC") {
-        "p3"<Float>() + "OBJ_POND"<Float> ()
-    }.sortByDesc("NFC", "p3", "p2", "acce", "accb").add("pos_final"){pos ++}
+        "p3"<Float>() + "OBJ_POND"<Float>()
+    }.sortByDesc("NFC", "p3", "p2", "acce", "accb").add("pos_final") { pos++ }
 }
 
 
@@ -95,11 +121,16 @@ fun DataFrame<*>.sumarizar(lista: String): DataFrame<*> {
     }
 }
 
-fun DataFrame<*>.removerZeradosPratica(): DataFrame<*>{
+fun DataFrame<*>.removerZeradosPratica(): DataFrame<*> {
     val columns = "pos_final"
-    return remove(columns).filter { "p3"<Float>() > 0 }.add(columns){index()+1}.moveToLeft(
+    return remove(columns).filter { "p3"<Float>() > 0 }
+        .add(columns) { index() + 1 }.moveToLeft(
         columns
     )
+}
+
+fun DataFrame<*>.manterClassificados(df: DataFrame<*>): DataFrame<*> {
+    return join(df, JoinType.Inner) { it["inscricao"] match right["inscricao"] }
 }
 
 fun DataFrame<*>.eliminados_pratica(): DataFrame<*> {
@@ -108,6 +139,8 @@ fun DataFrame<*>.eliminados_pratica(): DataFrame<*> {
     }
 }
 
+
+val headerInscNome = arrayOf("inscricao", "nome")
 
 val headerPratica = arrayOf("inscricao", "nome", "p3")
 val headerPraticaProv = arrayOf("inscricao", "nome", "p3_prov")
@@ -173,6 +206,40 @@ fun DataFrame.Companion.praticaSerpro(
         .normalizeData("nome".toColumnAccessor())
         .add("lista") { lista }
         .sortByDesc(header[2])
+}
+
+fun DataFrame.Companion.avaliacaoSerpro(
+    localFile: String,
+    header: Array<String> = headerInscNome
+): DataFrame<*> {
+    return DataFrame.fromLocal(localFile, ',', header = header)
+        .normalizeData("nome".toColumnAccessor())
+}
+
+
+fun DataFrame.Companion.praticaSerproPorItemProva(
+    localFile: String,
+    lista: String,
+    header: Array<String> = headerPratica
+): DataFrame<*> {
+    val headerPratica = arrayOf(
+        "inscricao",
+        "nome",
+        "p3",
+        "Q1.1",
+        "Q1.2",
+        "Q2.1",
+        "Q2.2",
+        "Q3.1",
+        "Q3.2",
+        "Q3.3"
+    )
+    return DataFrame.fromLocal(localFile, ',', header = headerPratica)
+        .normalizeData("nome".toColumnAccessor())
+        .add("lista") { lista }
+        .sortByDesc(header[2])
+        .add("pos_pratica") { index() + 1 }
+        .moveToLeft("pos_pratica")
 }
 
 fun DataFrame.Companion.finalSerpro(localFile: String): DataFrame<*> {
@@ -242,7 +309,6 @@ fun DataFrame.Companion.defaultStyle(): String {
 }
 
 
-
 fun DataFrame.Companion.fromLocal(
     filename: String,
     sep: Char = ',',
@@ -262,6 +328,16 @@ fun DataFrame.Companion.fromLocal(
 
     return csvdf.rename { it.all() }.into { normalize(it) }
 }
+
+val questoes = mapOf(
+    "A" to listOf(4.5, 4.0),
+    "B" to listOf(6.0, 2.0),
+    "C" to listOf(8.0, 3.0),
+    "D" to listOf(5.33333333333, 3.0),
+    "E" to listOf(2.5, 3.0),
+    "F" to listOf(2.5, 3.0),
+    "G" to listOf(5.0, 3.0)
+)
 
 
 fun DataFrame<*>.normalizeData(c: ColumnReference<*>): DataFrame<*> {

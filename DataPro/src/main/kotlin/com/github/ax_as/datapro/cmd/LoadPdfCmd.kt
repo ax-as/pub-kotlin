@@ -15,6 +15,11 @@ import kotlin.io.path.pathString
 class LoadPdfCmd : CliktCommand(name = "pdf") {
     val logger = KotlinLogging.logger {}
 
+    private val keepOutputPath: Boolean by option(
+        names = arrayOf("--kp")
+    ).flag(default = true)
+
+
     private val file: Path by argument()
         .path(mustExist = true)
     private val range: Pair<Int, Int>? by option().int().pair()

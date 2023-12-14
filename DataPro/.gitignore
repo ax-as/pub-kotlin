@@ -46,3 +46,4 @@ files/*
 *.txt*
 .
 args/*
+*.raw

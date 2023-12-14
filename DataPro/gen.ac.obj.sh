@@ -1,1 +1,0 @@
-./run.sh pdf --replace " / " "\n" -s " e nota final nas provas objetivas. " -e ". 1.1.1 Resultado final dos candidatos que solicitaram concorrer às vagas res" /data/files/ED_3_SERPRO_RES_FIN_OBJ_CONV_PRAT.PDF

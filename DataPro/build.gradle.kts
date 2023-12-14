@@ -17,40 +17,41 @@ repositories {
     mavenCentral()
     maven("https://repo.kotlin.link")
     maven(url = "https://jitpack.io")
+    repositories {
+        maven("https://repository.apache.org/content/repositories/snapshots/")
+    }
+
 
 }
-
-
-var kandy_version = "0.4.4"
-
-
 
 dependencies {
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
 
     dependencies {
-        implementation("org.jetbrains.kotlinx:dataframe:0.11.0")
+        implementation("org.jetbrains.kotlinx:dataframe:0.12.0")
         implementation("technology.tabula:tabula:1.0.5")
         implementation("com.github.ajalt.clikt:clikt:4.2.0")
         implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:4.4.2")
         implementation("org.jetbrains.lets-plot:lets-plot-image-export:4.0.0")
-//        implementation("io.github.microutils:kotlin-logging:2.0.11")
-//        implementation("ch.qos.logback:logback-classic:1.2.3"){
-//
-//
-//        }
+
+        val pdfBox = "3.0.1"
+        implementation("org.apache.pdfbox:pdfbox:$pdfBox"){
+            exclude(group = "ch.qos.logback", module = "logback-classic")
+        }
+        implementation("org.apache.pdfbox:fontbox:$pdfBox")
 
         // https://mvnrepository.com/artifact/org.slf4j/slf4j-nop
         testImplementation("org.slf4j:slf4j-nop:2.0.9")
 
 
+
+
         // This dependency is used by the application.
         implementation("com.google.guava:guava:32.1.1-jre")
-        // https://mvnrepository.com/artifact/org.apache.pdfbox/pdfbox
-        implementation("org.apache.pdfbox:pdfbox:3.0.0"){
-            exclude(group = "ch.qos.logback", module = "logback-classic")
-        }
+
+
+
     }
 }
 
